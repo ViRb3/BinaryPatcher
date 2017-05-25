@@ -60,8 +60,8 @@ namespace UnitTest
                                         0x5, 0x1, 0x3,
                                         0x1, 0x2 };
 
-            byte[] matchBytes = Utils.StringToByteArrayRaw("\x01\x02");
-            byte[] newBytes = Utils.StringToByteArrayRaw("\xff\xff");
+            byte[] matchBytes = Utils.StringToBytesRaw("\x01\x02");
+            byte[] newBytes = Utils.StringToBytesRaw("\xff\xff");
             string mask = "xx";
 
             Binary binary = new Binary(bytes);
@@ -121,8 +121,8 @@ namespace UnitTest
                                         0x5, 0x1, 0x3,
                                         0x1, 0x2 };
 
-            byte[] matchBytes = Utils.StringToByteArrayRaw("\x01\x02");
-            byte[] newBytes = Utils.StringToByteArrayRaw("\xff\xff");
+            byte[] matchBytes = Utils.StringToBytesRaw("\x01\x02");
+            byte[] newBytes = Utils.StringToBytesRaw("\xff\xff");
             string mask = "x?";
 
             Binary binary = new Binary(bytes);

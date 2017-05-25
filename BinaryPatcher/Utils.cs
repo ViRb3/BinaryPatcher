@@ -11,7 +11,7 @@ namespace BinaryPatcher
         /// </summary>
         /// <param name="input">String to convert.</param>
         /// <returns>Byte representation of input string.</returns>
-        public static byte[] StringToByteArrayRaw(string input)
+        public static byte[] StringToBytesRaw(string input)
         {
             return input.ToCharArray().Select(s => Convert.ToByte((int)s)).ToArray();
         }

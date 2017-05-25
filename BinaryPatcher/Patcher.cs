@@ -24,6 +24,8 @@ namespace BinaryPatcher
 
         public Binary(Stream stream)
         {
+            if (!stream.CanSeek)
+                throw new ArgumentException("Stream doesn't support seeking");
             _binaryStream = stream;
         }
 
@@ -72,14 +74,14 @@ namespace BinaryPatcher
             switch (replaceMode)
             {
                 case ReplaceMode.FirstMatch:
-                    await DoReplaceBytes(encoding.GetBytes(newString), matches[0]);
+                    await ReplaceBytes(encoding.GetBytes(newString), matches[0]);
                     break;
                 case ReplaceMode.LastMatch:
-                    await DoReplaceBytes(encoding.GetBytes(newString), matches[matches.Length - 1]);
+                    await ReplaceBytes(encoding.GetBytes(newString), matches[matches.Length - 1]);
                     break;
                 case ReplaceMode.AllMatches:
                     foreach (long index in matches)
-                        await DoReplaceBytes(encoding.GetBytes(newString), index);
+                        await ReplaceBytes(encoding.GetBytes(newString), index);
                     replaces = matches.Length;
                     break;
             }
@@ -131,14 +133,14 @@ namespace BinaryPatcher
             switch (replaceMode)
             {
                 case ReplaceMode.FirstMatch:
-                    await DoReplaceBytes(newBytes, matches[0]);
+                    await ReplaceBytes(newBytes, matches[0]);
                     break;
                 case ReplaceMode.LastMatch:
-                    await DoReplaceBytes(newBytes, matches[matches.Length - 1]);
+                    await ReplaceBytes(newBytes, matches[matches.Length - 1]);
                     break;
                 case ReplaceMode.AllMatches:
                     foreach (long index in matches)
-                        await DoReplaceBytes(newBytes, index);
+                        await ReplaceBytes(newBytes, index);
                     replaces = matches.Length;
                     break;
             }
@@ -147,6 +149,13 @@ namespace BinaryPatcher
                 replaces = 1;
 
             return replaces;
+        }
+
+        private async Task ReplaceBytes(byte[] newBytes, long startIndex)
+        {
+            _binaryStream.Position = startIndex;
+            await _binaryStream.WriteAsync(newBytes, 0, newBytes.Length);
+            _binaryStream.Position = 0;
         }
 
         private async Task<long[]> DoFindBytes(byte[] matchBytes, string mask = null)
@@ -162,13 +171,6 @@ namespace BinaryPatcher
             _binaryStream.Position = 0;
 
             return matches.ToArray();
-        }
-
-        private async Task DoReplaceBytes(byte[] newBytes, long startIndex)
-        {
-            _binaryStream.Position = startIndex;
-            await _binaryStream.WriteAsync(newBytes, 0, newBytes.Length);
-            _binaryStream.Position = 0;
         }
 
         private async Task<bool> SeekToByteArray(Stream stream, byte[] matchBytes, string mask = null)
