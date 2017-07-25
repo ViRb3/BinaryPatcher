@@ -16,7 +16,7 @@ namespace BinaryPatcher
     public class Binary
     {
         private readonly Stream _binaryStream;
-        private const int BUFFER_SIZE = 1024;
+        private const int BUFFER_SIZE = 4096;
 
         public Binary(byte[] bytes)
         {
