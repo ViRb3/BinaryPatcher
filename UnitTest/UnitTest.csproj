@@ -48,6 +48,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SplitMatchTest.cs" />
     <Compile Include="ByteOperationsTest.cs" />
     <Compile Include="StringOperationsTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

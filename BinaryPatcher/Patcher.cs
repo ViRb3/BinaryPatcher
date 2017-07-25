@@ -16,6 +16,7 @@ namespace BinaryPatcher
     public class Binary
     {
         private readonly Stream _binaryStream;
+        private const int BUFFER_SIZE = 1024;
 
         public Binary(byte[] bytes)
         {
@@ -173,6 +174,7 @@ namespace BinaryPatcher
             return matches.ToArray();
         }
 
+        //NOTE: Current implementation is limited to matches < BUFFER_SIZE bytes
         private async Task<bool> SeekToByteArray(Stream stream, byte[] matchBytes, string mask = null)
         {
             if (mask != null && mask.Length != matchBytes.Length)
@@ -180,30 +182,30 @@ namespace BinaryPatcher
             if (matchBytes.Length > stream.Length)
                 return false;
 
-            byte[] buffer = new byte[1024];
-            int i, matches = 0;
-            while ((i = await stream.ReadAsync(buffer, 0, 1024)) >= matchBytes.Length)
+            byte[] buffer = new byte[BUFFER_SIZE];
+            int bytesRead, bytesMatched = 0;
+            while ((bytesRead = await stream.ReadAsync(buffer, 0, BUFFER_SIZE)) >= matchBytes.Length)
             {
-                matches = 0;
-                for (int u = 0; u < buffer.Length; u++)
+                bytesMatched = 0;
+                for (int i = 0; i < buffer.Length; i++)
                 {
-                    if (matches == matchBytes.Length)
+                    if (bytesMatched == matchBytes.Length)
                     {
-                        stream.Seek(-i + u - matchBytes.Length, SeekOrigin.Current);
+                        stream.Seek(-bytesRead + i - matchBytes.Length, SeekOrigin.Current);
                         return true; // fileStream.Position - i + u - byteSequence.Length;
                     }
 
-                    if (buffer[u] == matchBytes[matches] || (mask != null && (mask[matches] == '?')))
+                    if (buffer[i] == matchBytes[bytesMatched] || (mask != null && (mask[bytesMatched] == '?')))
                     {
-                        matches++;
+                        bytesMatched++;
                     }
-                    else
+                    else if (bytesMatched > 0)
                     {
-                        u -= matches;
-                        matches = 0;
+                        i -= bytesMatched; // revert to second byte after matching started
+                        bytesMatched = 0;
                     }
                 }
-                stream.Position -= matchBytes.Length - 1;
+                stream.Position -= bytesMatched; // find match even if split across two blocks
             }
             return false; // -1;
         }
